@@ -14,10 +14,12 @@ from flask_wtf import FlaskForm
 from wtforms import StringField,PasswordField
 from wtforms.validators import InputRequired, EqualTo, Length,DataRequired
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField 
+from datetime import timedelta
 
 app = Flask (__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-UPLOAD_FOLDER = 'static/profileImages/'
+UPLOAD_FOLDER = 'static/profileimages/'
 ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg', 'gif','bmp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -58,10 +60,14 @@ def login():
                         if logindata[0] is  1:
                             print(logindata[0])
                             #flash("Logged In - Please update the Profile","success")
-                            return render_template("profile.html",name=username)  #first login
+                            return redirect(url_for('profile',name=username))
+                            #return render_template("profile.html",name=username)  #first login
                         else:
                             #flash("Logged In ","success")
+                            
+                             
                             return render_template("home.html",name=username)     #subsequent login
+                            
                     else:
                         flash("Incorrect Password","danger")
                         return render_template("login.html")
@@ -69,7 +75,8 @@ def login():
 
 @app.route("/", methods=['POST','GET'])
 def index():
-    return render_template("login.html")    
+    #return 'C-DIT VC Application' #render_template("login.html")  
+    return redirect(url_for('login' )) 
 
 @app.route("/profile", methods=['POST','GET'])
 def profile():    
@@ -83,11 +90,11 @@ def profile():
                 lastname = request.form.get("lastname")
                 email = request.form.get("email")
                 phone=request.form.get("phone")
-                print(file)
+                #print(file)
                 filename = secure_filename(file.filename)
                 print(filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))                
-                filename = "static/profileImages/"+ filename
+                filename = "static/profileimages/"+ filename
                 print(filename)
                 with open(filename, "rb") as imageFile:
                     image = b64encode(imageFile.read())
@@ -97,10 +104,12 @@ def profile():
                 #print("-------------")
                 #binaryImage = convertToBinaryData(filename)          # working
                 #print(binaryImage)
-                print(username)
-                #select firstlogin from tbl_users where username=:username",{"username":username}
+                print(image)
+                print(username) 
                 db.execute("update tbl_users set firstname=:firstname, lastname=:lastname, email=:email, phone=:phone, datetime=:datetime, photo=:photo where username=:username",{"firstname":firstname,"lastname":lastname,"email":email,"phone":phone,"datetime":datetime.datetime.now(),"photo":image,"username":username})
+                #db.execute("update tbl_users set datetime=:datetime, photo=:photo where username=:username",{"datetime":datetime.datetime.now(),"photo":image, "username":username})
                 db.commit()
+                print("DB updated")
                 #args = (firstname,lastname,email,phone,binaryImage,username)
                 #print(query)
                 #db.execute(query,args)
@@ -108,7 +117,8 @@ def profile():
                 #query="update tbl_users set firstname=%s, lastname=%s, email=%s, phone=%s, photo=%s where username=%s"
                 #args = (firstname,lastname,email,phone,binaryImage,username)
                 #db.execute(query,args)
-                return render_template("profile.html",name=username) 
+                #return render_template("profile.html",name=username) 
+                return redirect(url_for('profile' ))
         else:
             records=db.execute("select * from tbl_users where username=:username",{"username":username})
             #records = db.fetchall()
@@ -125,10 +135,13 @@ def profile():
             with open(filename, 'wb') as f:
                 f.write(img)
             profileimg = "static/profileimages/"+uname+"_profileimage.jpg"
+            profileimg = os.path.join(app.config['UPLOAD_FOLDER'], uname+'_profileimage.jpg')
             print(profileimg)
+            #return redirect(url_for('profile' ))#,name=username,fname=fname,lname=lname,eml=eml,phn=phn,profileimage=profileimg) )
             return render_template("profile.html",name=username,fname=fname,lname=lname,eml=eml,phn=phn,profileimage=profileimg)  
     else:
-        return render_template("login.html") 
+        #return render_template("login.html") 
+        return redirect(url_for('login'))
  
 @app.route('/home', methods=['POST','GET'])
 def home():
@@ -154,7 +167,8 @@ def schedulemeeting():
 def logout():
     if 'username' in session:
         session.pop('username',None) 
-    return render_template("login.html")
+    #return render_template("login.html")
+    return redirect(url_for('login'))
 
 class PasswordChangeForm(FlaskForm): 
     Username = StringField('Username',validators=[DataRequired(message='Username required')])
@@ -194,5 +208,14 @@ def convertToBinaryData(filename):
 
 if __name__ == "__main__":
     app.secret_key  = "CDITSREe"
+    app.permanent_session_lifetime = timedelta(minutes=5)
     app.run(debug=True)
     
+@app.after_request
+def add_header(response):
+    # response.cache_control.no_store = True
+    resp = make_response()
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
