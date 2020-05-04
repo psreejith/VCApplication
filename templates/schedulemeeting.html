@@ -1,0 +1,42 @@
+{% extends 'layout_home.html' %}
+
+{% block body %}
+<div class="container" style="padding-top: 5%;width: 40%;">
+<h1>Schedule Meeting</h1>
+<br>
+    <form action="" method='POST'>
+        <input type='hidden'  value="" name = "createinvitation" id = "createinvitation"/>
+        <div >
+            <label for="meetingname"  >Meeting Room Name</label>
+            <input type="text"   required placeholder="Enter Meeting Room Name" name="meetingroomname"/>             
+            <button type="submit" class="btn btn-primary" >Start Meeting</button>
+        </div>  
+        <div class="custom-control custom-switch">       Create Invitation   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="checkbox" class="custom-control-input" id="customSwitch1" 
+                {% if meetingurl != "" %} checked  {% endif %} onclick="onCreateInvitation()">    
+            <label class="custom-control-label" for="customSwitch1"></label>               
+        </div>    
+        <div class="custom-control custom-switch" id="meetinglinkdiv"  >
+            <textarea  cols="80" rows="10" name="meetinglink" id="meetinglink" >  {{meetingurl}} </textarea>         
+        </div>    <br>
+        <div class="custom-control custom-switch"> 
+           <input type="button" class="btn btn-primary" value="Copy Link" onclick="onCopyLink()"/> 
+        </div>   
+    </form>
+</div>
+<script>
+    function onCreateInvitation(){
+        var e = document.getElementById("meetinglinkdiv");
+       	e.style.display = (e.style.display == 'block') ? 'none' : 'block';
+        if (document.getElementById("customSwitch1").checked == true)
+           document.getElementById("createinvitation").value= 'Checked';
+        else   
+            document.getElementById("createinvitation").value= '';
+    }
+    function onCopyLink(){
+        document.getElementById("meetinglink").select();
+        document.execCommand('copy');
+    }
+    
+</script>
+{% endblock %}

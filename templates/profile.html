@@ -1,0 +1,73 @@
+{% extends 'layout_home.html' %}
+
+{% block body %}
+<h1>&nbsp;</h1>
+<h3 style="text-align: center;">Update Profile</h3>
+ <br>
+<div style="  width:50%" class="container">
+    <form action="" method='POST' enctype="multipart/form-data">
+         
+        <div class="form-row">
+            <div class="col">
+                <label for="firstname"  >First Name</label>
+              <input type="text" class="form-control" placeholder="Enter First name" name="firstname" required value='{{fname}}'>
+            </div>
+            <div class="col">
+                <label for="lastname"  >Last Name</label>
+              <input type="text" class="form-control" placeholder="Enter Last name" name="lastname" required value='{{lname}}'>
+            </div>
+          </div> <br>
+          <div class="form-row">
+            <div class="col">
+                <label for="email"  >Email</label>
+              <input type="email" class="form-control" placeholder="Enter Email " name="email" required value='{{eml}}'>
+            </div>
+            <div class="col">
+                <label for="phone"  >Phone Number </label>
+              <input type="text" class="form-control" placeholder="Enter Phone Number" name="phone" required value='{{phn}}'>
+            </div>
+          </div><br>
+          <div class="form-row">
+            <div class="col">
+                <label for="username"  >Username</label>
+              <input type="email" class="form-control" disabled value='{{name}}' name="username" required>
+            </div>
+            <div class="col">
+               <!-- <label for="password"  >Password </label>
+                <input type="text" class="form-control" placeholder="Enter New Password" name="password" required>
+               -->
+            </div> 
+          </div><br>
+          <div class="form-row">
+            <div class="col">
+                <label for="exampleFormControlFile1">Upload Photo (Image) </label>
+                <input type="file" class="form-control-file" name="file" accept="image/gif, image/jpeg, image/png, image/jpg"  onchange="readURL(this);">
+            </div>
+            <div class="col">
+                <img src="#"  width="100px" height="100px" id="img_file" style="display: none;"/>
+                <img src="{{profileimage}}"  width="100px" height="100px" id="profile_img"/>
+            </div>
+          </div><br>
+        <button type="submit" class="btn btn-primary" value="UpdateProfile" name="updateprofileBtn">Update Profile</button>
+        </table>
+    </form>
+</div>
+<script>
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#img_file')
+                    .attr('src', e.target.result)
+                    //.width(150)
+                    //.height(200);
+            };
+
+            reader.readAsDataURL(input.files[0]);
+            document.getElementById("img_file").style.display="block";
+            document.getElementById("profile_img").style.display="none";
+        }
+    }
+</script>
+{% endblock %}
